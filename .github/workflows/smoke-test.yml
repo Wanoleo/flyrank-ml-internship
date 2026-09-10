@@ -74,8 +74,13 @@ jobs:
                   continue
               code = [c for c in nb.get("cells", []) if c.get("cell_type") == "code"]
               src = sum(len("".join(c.get("source", []))) for c in code)
+              # Ignore untouched skeleton cells that contain only comments/instructions.
+              meaningful = "".join(
+                  line for c in code for line in c.get("source", [])
+                  if line.strip() and not line.lstrip().startswith("#")
+              )
               has_out = any(c.get("outputs") for c in code)
-              if code and src > 200 and not has_out:
+              if code and src > 200 and meaningful.strip() and not has_out:
                   kind = "error" if final else "warning"
                   print(f"::{kind} file={p}::{p} has filled code cells but no outputs - "
                         "did Colab save an unrun copy? Runtime -> Run all, then save again.")
