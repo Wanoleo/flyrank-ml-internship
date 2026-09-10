@@ -73,7 +73,13 @@ jobs:
               except Exception:
                   continue
               code = [c for c in nb.get("cells", []) if c.get("cell_type") == "code"]
-              src = sum(len("".join(c.get("source", []))) for c in code)
+              src = 0
+              for c in code:
+                  for line in "".join(c.get("source", [])).splitlines():
+                      s = line.strip()
+                      if not s or s.startswith("#"):
+                          continue
+                      src += len(s)
               has_out = any(c.get("outputs") for c in code)
               if code and src > 200 and not has_out:
                   kind = "error" if final else "warning"
